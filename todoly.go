@@ -158,16 +158,9 @@ func auth() (string, error) {
 }
 
 func main() {
-	command := &commander.Command{
-		UsageLine: os.Args[0],
-		Short:     "cli interface for todo.ly",
-	}
-	command.Subcommands = []*commander.Command{
-		make_cmd_list(),
-		make_cmd_add(),
-		make_cmd_del(),
-	}
-	err := command.Dispatch(os.Args[1:])
+	commander.Defaults.UsageLine = os.Args[0]
+	commander.Defaults.Short = "cli interface for todo.ly"
+	err := commander.Defaults.Dispatch(os.Args[1:])
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
