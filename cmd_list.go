@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/daviddengcn/go-colortext"
 	"github.com/gonuts/commander"
@@ -34,6 +35,9 @@ func make_cmd_list() *commander.Command {
 		}
 		defer res.Body.Close()
 
+		if res.StatusCode != 200 {
+			return errors.New(res.Status)
+		}
 		b, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return err
@@ -41,11 +45,10 @@ func make_cmd_list() *commander.Command {
 
 		var aerr ErrorObject
 		err = json.Unmarshal(b, &aerr)
-		if err != nil {
-			return err
-		}
-		if aerr.ErrorCode != 0 {
-			return fmt.Errorf("%d: %s", aerr.ErrorCode, aerr.ErrorMessage)
+		if err == nil {
+			if aerr.ErrorCode != 0 {
+				return fmt.Errorf("%d: %s", aerr.ErrorCode, aerr.ErrorMessage)
+			}
 		}
 
 		var items []ItemObject

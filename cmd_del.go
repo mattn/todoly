@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,9 +8,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 )
 
-func make_cmd_add() *commander.Command {
+func make_cmd_del() *commander.Command {
 	cmd_add := func(cmd *commander.Command, args []string) error {
 		if len(args) != 1 {
 			cmd.Usage()
@@ -23,16 +23,11 @@ func make_cmd_add() *commander.Command {
 		}
 
 		for _, arg := range args {
-			item := struct {
-				Content string `json:"Content"`
-			}{arg}
-
-			var buf bytes.Buffer
-			err = json.NewEncoder(&buf).Encode(&item)
+			i, err := strconv.Atoi(arg)
 			if err != nil {
 				return err
 			}
-			req, err := http.NewRequest("POST", "https://todo.ly/api/items.json", &buf)
+			req, err := http.NewRequest("DELETE", fmt.Sprintf("https://todo.ly/api/%d.json", i), nil)
 			if err != nil {
 				return err
 			}
@@ -44,8 +39,9 @@ func make_cmd_add() *commander.Command {
 			defer res.Body.Close()
 
 			if res.StatusCode != 200 {
-				return errors.New(res.Status)
+				return errors.New("todo not found")
 			}
+
 			b, err := ioutil.ReadAll(res.Body)
 			if err != nil {
 				return err
@@ -64,7 +60,7 @@ func make_cmd_add() *commander.Command {
 
 	return &commander.Command{
 		Run:       cmd_add,
-		UsageLine: "add [options] [name]",
-		Short:     "add todo",
+		UsageLine: "del [options] [id]",
+		Short:     "del todo",
 	}
 }

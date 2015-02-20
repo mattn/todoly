@@ -165,6 +165,7 @@ func main() {
 	command.Subcommands = []*commander.Command{
 		make_cmd_list(),
 		make_cmd_add(),
+		make_cmd_del(),
 	}
 	err := command.Dispatch(os.Args[1:])
 	if err != nil {
