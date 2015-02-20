@@ -1,6 +1,6 @@
 # todoly
 
-cli interface for todoly
+cli interface for [todo.ly](http://todo.ly/)
 
 ![](http://go-gyazo.appspot.com/bd8080b81e9d663d.png)
 
