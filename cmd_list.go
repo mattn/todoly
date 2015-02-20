@@ -63,12 +63,12 @@ func init() {
 				ct.ResetColor()
 				fmt.Print(" ")
 				if item.Checked {
-					ct.ChangeColor(ct.Red, false, ct.None, false)
-					fmt.Print("✕")
+					ct.ChangeColor(ct.Green, false, ct.None, false)
+					fmt.Print("☑")
 					ct.ResetColor()
 				} else {
-					ct.ChangeColor(ct.Green, false, ct.None, false)
-					fmt.Print("✓")
+					ct.ChangeColor(ct.Yellow, false, ct.None, false)
+					fmt.Print("☐")
 					ct.ResetColor()
 				}
 				fmt.Print(" ")
