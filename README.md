@@ -2,6 +2,8 @@
 
 cli interface for todoly
 
+![](http://go-gyazo.appspot.com/bd8080b81e9d663d.png)
+
 ## Usage
 
 ```
