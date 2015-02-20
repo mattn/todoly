@@ -13,8 +13,8 @@ import (
 )
 
 func init() {
-	commander.Defaults.Subcommands = append(commander.Defaults.Subcommands, &commander.Command{
-		Run: func(cmd *commander.Command, args []string) error {
+	makecmd := func(check bool) func(cmd *commander.Command, args []string) error {
+		return func(cmd *commander.Command, args []string) error {
 			if len(args) != 1 {
 				cmd.Usage()
 				os.Exit(1)
@@ -31,7 +31,7 @@ func init() {
 				}
 				item := struct {
 					Checked bool `json:"Checked"`
-				}{true}
+				}{check}
 
 				var buf bytes.Buffer
 				err = json.NewEncoder(&buf).Encode(&item)
@@ -66,8 +66,18 @@ func init() {
 				}
 			}
 			return nil
-		},
+		}
+	}
+
+	commander.Defaults.Subcommands = append(commander.Defaults.Subcommands, &commander.Command{
+		Run:       makecmd(true),
 		UsageLine: "check [options] [id]",
 		Short:     "check the todo",
+	})
+
+	commander.Defaults.Subcommands = append(commander.Defaults.Subcommands, &commander.Command{
+		Run:       makecmd(false),
+		UsageLine: "uncheck [options] [id]",
+		Short:     "uncheck the todo",
 	})
 }
