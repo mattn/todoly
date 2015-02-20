@@ -3,11 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/daviddengcn/go-colortext"
 	"github.com/fhs/go-netrc/netrc"
+	"github.com/gonuts/commander"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -21,13 +20,6 @@ var _ io.Writer
 var _ *os.File
 
 var dateRe = regexp.MustCompile(`^"\\/Date\(([0-9]+)\)\\/"$`)
-
-var priorityColor = map[int64]ct.Color{
-	1: ct.Red,
-	2: ct.Blue,
-	3: ct.Green,
-	4: ct.White,
-}
 
 type ErrorObject struct {
 	ErrorMessage string `json:"ErrorMessage"`
@@ -123,7 +115,7 @@ type ItemObject struct {
 	Recurrence         RecurrenceObject `json:"Recurrence"`
 }
 
-func main() {
+func auth() (string, error) {
 	home := os.Getenv("HOME")
 	if runtime.GOOS == "windows" && home == "" {
 		home = os.Getenv("USERPROFILE")
@@ -132,76 +124,50 @@ func main() {
 
 	req, err := http.NewRequest("GET", "https://todo.ly/api/authentication/token.json", nil)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	if m != nil {
 		req.SetBasicAuth(m.Login, m.Password)
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	defer res.Body.Close()
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	var aerr ErrorObject
 	err = json.Unmarshal(b, &aerr)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	if aerr.ErrorCode != 0 {
-		log.Fatalf("%d: %s", aerr.ErrorCode, aerr.ErrorMessage)
+		return "", fmt.Errorf("%d: %s", aerr.ErrorCode, aerr.ErrorMessage)
 	}
 
 	var ares TokenObject
 	err = json.Unmarshal(b, &ares)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
+	return ares.TokenString, nil
+}
 
-	req, err = http.NewRequest("GET", "https://todo.ly/api/items.json", nil)
-	if err != nil {
-		log.Fatal(err)
+func main() {
+	command := &commander.Command{
+		UsageLine: os.Args[0],
+		Short:     "cli interface for todo.ly",
 	}
-	req.Header.Add("Token", ares.TokenString)
-	res, err = http.DefaultClient.Do(req)
-	if err != nil {
-		log.Fatal(err)
+	command.Subcommands = []*commander.Command{
+		make_cmd_list(),
 	}
-	defer res.Body.Close()
-	var items []ItemObject
-	err = json.NewDecoder(res.Body).Decode(&items)
+	err := command.Dispatch(os.Args[1:])
 	if err != nil {
-		log.Fatal(err)
-	}
-	for _, item := range items {
-		ct.ChangeColor(ct.Magenta, false, ct.None, false)
-		fmt.Printf("%8d", item.Id)
-		ct.ResetColor()
-		fmt.Print(" ")
-		if item.Checked {
-			ct.ChangeColor(ct.Red, false, ct.None, false)
-			fmt.Print("✕")
-			ct.ResetColor()
-		} else {
-			ct.ChangeColor(ct.Green, false, ct.None, false)
-			fmt.Print("✓")
-			ct.ResetColor()
-		}
-		fmt.Print(" ")
-		if pc, ok := priorityColor[item.Priority]; ok {
-			ct.ChangeColor(pc, false, ct.None, false)
-		}
-		fmt.Print(item.Content)
-		ct.ResetColor()
-		fmt.Print(" ")
-		ct.ChangeColor(ct.Black, true, ct.None, false)
-		fmt.Print(item.CreatedDate.Format("2006/01/02 15:04:05"))
-		ct.ResetColor()
-		fmt.Println()
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
