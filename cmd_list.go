@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/daviddengcn/go-colortext"
 	"github.com/gonuts/commander"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -32,8 +33,23 @@ func make_cmd_list() *commander.Command {
 			return err
 		}
 		defer res.Body.Close()
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+
+		var aerr ErrorObject
+		err = json.Unmarshal(b, &aerr)
+		if err != nil {
+			return err
+		}
+		if aerr.ErrorCode != 0 {
+			return fmt.Errorf("%d: %s", aerr.ErrorCode, aerr.ErrorMessage)
+		}
+
 		var items []ItemObject
-		err = json.NewDecoder(res.Body).Decode(&items)
+		err = json.Unmarshal(b, &items)
 		if err != nil {
 			return err
 		}
