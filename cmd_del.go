@@ -28,7 +28,7 @@ func init() {
 				if err != nil {
 					return err
 				}
-				req, err := http.NewRequest("DELETE", fmt.Sprintf("https://todo.ly/api/%d.json", i), nil)
+				req, err := http.NewRequest("DELETE", fmt.Sprintf("https://todo.ly/api/items/%d.json", i), nil)
 				if err != nil {
 					return err
 				}
@@ -59,6 +59,6 @@ func init() {
 			return nil
 		},
 		UsageLine: "del [options] [id]",
-		Short:     "del todo",
+		Short:     "del the todo",
 	})
 }
