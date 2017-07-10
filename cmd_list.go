@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/daviddengcn/go-colortext"
-	"github.com/gonuts/commander"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/daviddengcn/go-colortext"
+	"github.com/gonuts/commander"
 )
 
 var priorityColor = map[int64]ct.Color{

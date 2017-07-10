@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fhs/go-netrc/netrc"
-	"github.com/gonuts/commander"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +12,9 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/fhs/go-netrc/netrc"
+	"github.com/gonuts/commander"
 )
 
 var _ io.Writer
